@@ -23,6 +23,7 @@ ENV_NAME="ldm"
 ENV_MODIFIED=$(date -r $ENV_FILE "+%s")
 ENV_MODIFED_FILE=".env_updated"
 ENV_UPDATED=0
+PYTORCH_ROCM_URL="https://download.pytorch.org/whl/rocm5.2"
 
 INSTALL_ENV_DIR="$(pwd)/../installer_files/env" # since linux-sd.sh clones the repo into a subfolder
 if [ -e "$INSTALL_ENV_DIR" ]; then export PATH="$INSTALL_ENV_DIR/bin:$PATH"; fi
@@ -45,47 +46,9 @@ fi
 
 # Setup the Conda env for the project. This will also handle updating the env as needed too.
 conda_env_setup () {
-    # Set conda path if it is not already in default environment
-    CUSTOM_CONDA_PATH=
-
-    # Allow setting custom path via file to allow updates of this script without undoing custom path
-    if [ -f custom-conda-path.txt ]; then
-        CUSTOM_CONDA_PATH=$(cat custom-conda-path.txt)
-    fi
-
-    # If a custom conda isn't specified, and the installer downloaded conda for the user, then use that
-    if [ -f "$INSTALL_ENV_DIR/etc/profile.d/conda.sh" ] && [ "$CUSTOM_CONDA_PATH" == "" ]; then
-        . "$INSTALL_ENV_DIR/etc/profile.d/conda.sh"
-    fi
-
-    # If custom path is set above, try to setup conda environment
-    if [ -f "${CUSTOM_CONDA_PATH}/etc/profile.d/conda.sh" ]; then
-        . "${CUSTOM_CONDA_PATH}/etc/profile.d/conda.sh"
-    elif [ -n "${CUSTOM_CONDA_PATH}" ] && [ -f "${CUSTOM_CONDA_PATH}/bin" ]; then
-        export PATH="${CUSTOM_CONDA_PATH}/bin:$PATH"
-    fi
-
-    if ! command -v conda >/dev/null; then
-        printf "Anaconda3 not found. Install from here https://www.anaconda.com/products/distribution\n"
-        exit 1
-    fi
-
-    # Create/update conda env if needed
-    if ! conda env list | grep ".*${ENV_NAME}.*" >/dev/null 2>&1; then
-        printf "Could not find conda env: ${ENV_NAME} ... creating ... \n\n"
-        conda env create -f $ENV_FILE
-        ENV_UPDATED=1
-    elif [[ ! -z $CONDA_FORCE_UPDATE && $CONDA_FORCE_UPDATE == "true" ]] || (( $ENV_MODIFIED > $ENV_MODIFIED_CACHED )); then
-        printf "Updating conda env: ${ENV_NAME} ...\n\n"
-        PIP_EXISTS_ACTION=w conda env update --file $ENV_FILE --prune
-        ENV_UPDATED=1
-    fi
-
-    # Clear artifacts from conda after create/update
-    if (( $ENV_UPDATED > 0 )); then
-        conda clean --all
-        echo -n $ENV_MODIFIED > $ENV_MODIFED_FILE
-    fi
+    conda env create -f environment.yaml
+    conda activate $ENV_NAME
+    pip install --upgrade torch torchvision torchaudio --extra-index-url $PYTORCH_ROCM_URL
 }
 
 # Activate conda environment
