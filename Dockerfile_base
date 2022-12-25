@@ -1,4 +1,4 @@
-ARG PYTORCH_IMAGE=hlky/pytorch:1.12.1-runtime
+ARG PYTORCH_IMAGE=rocm/pytorch:rocm5.4_ubuntu20.04_py3.8_pytorch_staging
 
 FROM ${PYTORCH_IMAGE}
 SHELL ["/bin/bash", "-c"]
