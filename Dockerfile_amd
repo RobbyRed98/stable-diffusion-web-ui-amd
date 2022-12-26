@@ -1,0 +1,42 @@
+ARG PYTORCH_IMAGE=rocm/pytorch:rocm5.4_ubuntu20.04_py3.8_pytorch_staging
+
+FROM ${PYTORCH_IMAGE}
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /install
+
+RUN apt-get update && \
+    apt-get install -y wget curl git build-essential zip unzip nano openssh-server libgl1 libsndfile1-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY ./requirements.txt /install/
+COPY ./setup.py /install/
+COPY ./environment.yaml /install/
+
+RUN /opt/conda/bin/python -m pip install -r /install/requirements.txt
+RUN /opt/conda/bin/conda clean -ya
+RUN /opt/conda/bin/conda env create -f environment.yaml
+RUN /opt/conda/envs/ldm/bin/pip install --upgrade torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/rocm5.2
+
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /sd
+
+EXPOSE 8501
+COPY ./entrypoint.sh /sd/
+COPY ./data/DejaVuSans.ttf /usr/share/fonts/truetype/
+COPY ./data/ /sd/data/
+copy ./images/ /sd/images/
+copy ./scripts/ /sd/scripts/
+copy ./ldm/ /sd/ldm/
+copy ./frontend/ /sd/frontend/
+copy ./configs/ /sd/configs/
+copy ./configs/webui/webui_streamlit.yaml /sd/configs/webui/userconfig_streamlit.yaml
+copy ./.streamlit/ /sd/.streamlit/
+copy ./optimizedSD/ /sd/optimizedSD/
+
+ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
+RUN mkdir -p ~/.streamlit/
+RUN echo "[general]\nemail = \"\""  > ~/.streamlit/credentials.toml
+ENTRYPOINT /sd/entrypoint.sh
