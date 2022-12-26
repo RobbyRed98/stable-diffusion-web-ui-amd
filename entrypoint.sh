@@ -120,9 +120,11 @@ ln -fs ${MODEL_DIR}/sd-concepts-library/sd-concepts-library/ ${SCRIPT_DIR}/model
 mkdir -p ${SCRIPT_DIR}/user_data/outputs
 ln -fs ${SCRIPT_DIR}/user_data/outputs/ ${SCRIPT_DIR}/outputs
 
-echo "export HF_HOME=${MODEL_DIR}" >> ~/.bashrc
-echo "export XDG_CACHE_HOME=${MODEL_DIR}" >> ~/.bashrc
-echo "export TRANSFORMERS_CACHE=${MODEL_DIR}" >> ~/.bashrc
+if ! grep TRANSFORMERS_CACHE --quiet ~/.bashrc; then
+    echo "export HF_HOME=${MODEL_DIR}" >> ~/.bashrc
+    echo "export XDG_CACHE_HOME=${MODEL_DIR}" >> ~/.bashrc
+    echo "export TRANSFORMERS_CACHE=${MODEL_DIR}" >> ~/.bashrc
+fi
 source ~/.bashrc
 cd $SCRIPT_DIR
 launch_command="streamlit run ${SCRIPT_DIR}/scripts/webui_streamlit.py"
