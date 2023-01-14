@@ -35,8 +35,9 @@ copy ./configs/ /sd/configs/
 copy ./configs/webui/webui_streamlit.yaml /sd/configs/webui/userconfig_streamlit.yaml
 copy ./.streamlit/ /sd/.streamlit/
 copy ./optimizedSD/ /sd/optimizedSD/
+COPY ./entrypoint_slim.sh /sd/
 
 ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
 RUN mkdir -p ~/.streamlit/
-RUN echo "[general]\nemail = \"\""  > ~/.streamlit/credentials.toml
+RUN echo $'[general]\nemail = \"\"'  > ~/.streamlit/credentials.toml
 ENTRYPOINT /sd/entrypoint.sh
