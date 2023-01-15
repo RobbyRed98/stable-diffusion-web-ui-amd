@@ -1,6 +1,6 @@
 # Notice
 
-This repository provides an additional `Dockerfile_amd` enabling AMD GPU (via ROCm) support for the stable-diffusion webui develop in the original repo:
+This repository provides an additional `Dockerfile_amd` enabling AMD GPU (via ROCm) support for the stable-diffusion webui developed by the authors of the original repository:
 
 https://github.com/Sygil-Dev/sygil-webui
 
