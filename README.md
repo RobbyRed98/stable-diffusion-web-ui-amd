@@ -1,3 +1,27 @@
+# Notice
+
+This repository provides an additional `Dockerfile_amd` enabling AMD GPU (via ROCm) support for the stable-diffusion webui develop in the original repo:
+https://github.com/Sygil-Dev/sygil-webui
+
+## Build 
+
+```bash
+docker build . -f Dockerfile_amd -t sd-amd-v1
+```
+
+## Run
+
+```bash
+docker run -it --network=host --device=/dev/kfd --device=/dev/dri --group-add=video --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --name sd-webui-v1 sd-amd-v1:latest
+```
+
+### Note
+
+#### Graphics cards
+The container expects to run on an device with an RX 6600XT and thus requires the `HSA_OVERRIDE_GFX_VERSION=10.3.0` variable. 
+If a graphics card with another architecture older than Navi 23 is used the container has to be built without the line `ENV HSA_OVERRIDE_GFX_VERSION=10.3.0`.
+
+
 # <center>Web-based UI for Stable Diffusion</center>
 
 ## Created by [Sygil.Dev](https://github.com/sygil-dev)
